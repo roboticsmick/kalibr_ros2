@@ -5,6 +5,7 @@ project(sm_kinematics
   DESCRIPTION "General Kinematics Utilities"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 find_package(Boost REQUIRED COMPONENTS filesystem serialization system)

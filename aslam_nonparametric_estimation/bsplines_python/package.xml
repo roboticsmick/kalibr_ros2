@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bsplines_python</name>
+  <version>0.0.1</version>
+  <description>Python bindings for bsplines</description>
+  <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>New BSD</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>python_module</build_depend>
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>bsplines</build_depend>
+  <build_depend>sparse_block_matrix</build_depend>
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_kinematics</build_depend>
+  <build_depend>boost</build_depend>
+  <build_depend>python3-numpy</build_depend>
+  <exec_depend>bsplines</exec_depend>
+  <exec_depend>sm_kinematics</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

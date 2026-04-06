@@ -5,6 +5,7 @@ project(sm_property_tree
   DESCRIPTION "Property trees act as configs for multiple classes"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 find_package(sm_common REQUIRED)

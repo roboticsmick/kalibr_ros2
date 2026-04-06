@@ -5,6 +5,7 @@ project(aslam_cameras
   DESCRIPTION "ASLAM Camera Models and Geometry"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS filesystem serialization system)
 find_package(Eigen3 REQUIRED)

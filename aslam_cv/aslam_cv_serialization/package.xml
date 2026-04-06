@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="3">
+  <name>aslam_cv_serialization</name>
+  <version>0.0.1</version>
+  <description>ASLAM CV serialization support</description>
+  <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>New BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>aslam_cameras</build_depend>
+  <build_depend>aslam_time</build_depend>
+  <build_depend>sm_boost</build_depend>
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>sm_kinematics</build_depend>
+  <build_depend>sm_logging</build_depend>
+  <build_depend>sm_opencv</build_depend>
+  <build_depend>sm_property_tree</build_depend>
+  <build_depend>boost</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+
+  <exec_depend>aslam_cameras</exec_depend>
+  <exec_depend>sm_common</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

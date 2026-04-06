@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="3">
+  <name>aslam_splines</name>
+  <version>0.0.1</version>
+  <description>aslam_splines</description>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>aslam_backend</build_depend>
+  <build_depend>aslam_backend_expressions</build_depend>
+  <build_depend>bsplines</build_depend>
+  <build_depend>suitesparse</build_depend>
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_kinematics</build_depend>
+  <build_depend>sm_timing</build_depend>
+  <build_depend>sparse_block_matrix</build_depend>
+
+  <exec_depend>aslam_backend</exec_depend>
+  <exec_depend>aslam_backend_expressions</exec_depend>
+  <exec_depend>bsplines</exec_depend>
+  <exec_depend>suitesparse</exec_depend>
+  <exec_depend>numpy_eigen</exec_depend>
+  <exec_depend>sm_common</exec_depend>
+  <exec_depend>sm_kinematics</exec_depend>
+  <exec_depend>sm_timing</exec_depend>
+  <exec_depend>sparse_block_matrix</exec_depend>
+
+  <build_depend>boost</build_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

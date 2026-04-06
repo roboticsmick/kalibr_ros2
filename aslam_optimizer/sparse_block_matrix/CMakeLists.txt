@@ -5,6 +5,7 @@ project(sparse_block_matrix
   DESCRIPTION "Sparse block matrix library"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Eigen3)
 find_package(sm_common REQUIRED)

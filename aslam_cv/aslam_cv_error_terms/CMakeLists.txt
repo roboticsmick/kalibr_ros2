@@ -4,6 +4,7 @@ project(aslam_cv_error_terms
   VERSION 0.1.0
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(aslam_backend REQUIRED)
 find_package(aslam_backend_expressions REQUIRED)

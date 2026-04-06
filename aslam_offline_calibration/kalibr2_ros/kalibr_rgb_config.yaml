@@ -1,0 +1,31 @@
+# kalibr_ros2 camera intrinsics calibration config for OAK-FFC-3P IMX577 (RGB camera)
+#
+# Used by: ros2 run kalibr2_ros kalibr_calibrate_cameras
+#
+# This calibrates the camera INTRINSICS ONLY (focal length, principal point, distortion).
+# The IMU-to-camera extrinsics are calibrated separately with kalibr_calibrate_imu_camera.
+#
+# INPUT BAG: recorded with oak_ffc_3p_rgb_calibration.yaml (10 FPS, 1920x1080)
+#
+board:
+  target_type: 'aprilgrid'
+  tagCols: 6
+  tagRows: 6
+  tagSize: 0.088        # metres — must match kalibr_aprilgrid.yaml
+  tagSpacing: 0.3       # gap/tagSize ratio — must match kalibr_aprilgrid.yaml
+
+cameras:
+  rgb_imx577:
+    # pinhole-radtan: standard pinhole projection + radial-tangential distortion
+    # Matches the model used by DepthAI EEPROM and survey_ros2 capture_node.py
+    model: 'pinhole-radtan'
+
+    # Initial focal length guess in pixels for 1920px width, ~3.84 mm lens, 1.55 μm pixel
+    # fx ≈ focal_mm / pixel_size_mm = 3.84 / 0.00155 ≈ 2477 px
+    focal_length_fallback: 2477.0
+
+    source:
+      # Path to the recorded ROS2 bag (MCAP format)
+      # Update this path to wherever you saved the calibration recording
+      rosbag_path: '/media/logic/USamsung/ros2_ws/calibration_bags/rgb_imu_calibration'
+      topic: '/oak/rgb/image_raw'

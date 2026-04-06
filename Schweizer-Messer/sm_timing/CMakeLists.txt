@@ -5,6 +5,7 @@ project(sm_timing
   DESCRIPTION "Timing utilities"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(sm_common REQUIRED)

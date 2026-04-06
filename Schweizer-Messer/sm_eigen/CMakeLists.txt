@@ -5,6 +5,7 @@ project(sm_eigen
   DESCRIPTION "Eigen3 utilities for Schweizer-Messer"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(sm_common REQUIRED)
 find_package(sm_random REQUIRED)

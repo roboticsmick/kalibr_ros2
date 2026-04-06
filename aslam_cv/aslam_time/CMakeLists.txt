@@ -5,6 +5,7 @@ project(aslam_time
   DESCRIPTION "Time utilities for aslam_cv"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS system)
 

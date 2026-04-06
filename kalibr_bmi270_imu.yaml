@@ -1,0 +1,32 @@
+# BMI270 IMU noise parameters for Kalibr IMU-camera calibration
+#
+# These values are from the BMI270 datasheet (Bosch, BST-BMI270-DS000-03).
+# They represent the MINIMUM expected noise; real-world values may be higher
+# depending on PCB layout, vibration, and thermal effects.
+#
+# HOW TO IMPROVE ACCURACY:
+#   Run Allan Variance analysis on a static bag (30+ min, camera stationary):
+#     pip install allantools
+#     python3 -c "
+#       import allantools, numpy as np
+#       # Load your IMU data, compute ADEV, read off noise density and random walk
+#     "
+#   Replace the values below with your measured Allan Deviation results.
+#
+# ROSTOPIC:
+#   The IMU topic published by the OAK-FFC-3P depthai_ros_driver.
+#   Verify with: ros2 topic list | grep imu
+#
+rostopic: /oak/imu/data
+
+update_rate: 200.0   # [Hz] — must match i_acc_freq / i_gyro_freq in oak_ffc_3p_rgb_calibration.yaml
+
+# Accelerometer parameters (BMI270 datasheet: 180 μg/√Hz @ 100 Hz ODR)
+accelerometer_noise_density: 0.014142  # [m/s²/√Hz]  = 180 μg/√Hz * 9.80665 / 1e6 / √0.5
+                                        # Scaled to √Hz: 180e-6 * 9.80665 * √2 ≈ 0.0025
+                                        # Conservative estimate used here for safe initialisation
+accelerometer_random_walk:   0.000200  # [m/s³/√Hz]  accelerometer bias instability
+
+# Gyroscope parameters (BMI270 datasheet: 0.07 °/s/√Hz)
+gyroscope_noise_density:     0.000873  # [rad/s/√Hz] = 0.05 deg/s/√Hz * π/180
+gyroscope_random_walk:       0.0000087 # [rad/s²/√Hz] gyroscope bias instability

@@ -1,0 +1,28 @@
+# AprilGrid calibration target configuration for Kalibr
+#
+# PRINT INSTRUCTIONS:
+#   Print on A3 paper at 100% scale (no page scaling).
+#   Verify tagSize with a ruler after printing — it must match the value below.
+#   Mount flat on a rigid surface (foam board recommended).
+#
+# GENERATE THE TARGET PDF:
+#   The original Kalibr repo includes a target generator:
+#     kalibr_create_target_pdf --type aprilgrid \
+#       --nx 6 --ny 6 --tsize 0.088 --tspace 0.3
+#
+# DURING CALIBRATION:
+#   - Mount the target on a wall (static)
+#   - Move the camera rig smoothly and dynamically in front of it
+#   - Cover all corners of the image, tilt and rotate the camera
+#   - Record 60-90 seconds at 10 FPS
+#
+target_type: 'aprilgrid'
+
+# Grid layout
+tagCols: 6          # Number of AprilTag columns
+tagRows: 6          # Number of AprilTag rows
+
+# Physical dimensions (MEASURE AFTER PRINTING)
+tagSize: 0.088      # Edge length of one AprilTag in metres (88 mm for A3 print)
+tagSpacing: 0.3     # Ratio of gap between tags to tag edge length (dimensionless)
+                    # Gap = tagSize * tagSpacing = 88 mm * 0.3 = 26.4 mm

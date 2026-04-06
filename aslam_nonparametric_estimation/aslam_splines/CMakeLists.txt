@@ -4,6 +4,7 @@ project(aslam_splines
   VERSION 0.1.0
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(aslam_backend REQUIRED)

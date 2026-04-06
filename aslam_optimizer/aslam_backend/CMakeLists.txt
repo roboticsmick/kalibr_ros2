@@ -5,6 +5,7 @@ project(aslam_backend
   DESCRIPTION "Backend for ASLAM optimization"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(Eigen3 REQUIRED)

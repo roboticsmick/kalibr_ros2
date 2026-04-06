@@ -3,6 +3,7 @@ project(aslam_cv_backend
   VERSION 0.1.0
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(aslam_backend REQUIRED)
 find_package(aslam_backend_expressions REQUIRED)
@@ -17,21 +18,25 @@ find_package(sm_opencv REQUIRED)
 find_package(sm_property_tree REQUIRED)
 find_package(sm_timing REQUIRED)
 find_package(sparse_block_matrix REQUIRED)
+find_package(aslam_cameras REQUIRED)
 
 
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}
+  src/GridCalibrationTargetDesignVariableContainer.cpp
+)
 
 target_include_directories(${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 
 target_link_libraries(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   aslam_backend::aslam_backend
   aslam_backend_expressions::aslam_backend_expressions
+  aslam_cameras::aslam_cameras
   aslam_time::aslam_time
   Boost::system
   sm_boost::sm_boost
@@ -47,14 +52,14 @@ target_link_libraries(
 
 target_compile_options(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   "-Wall"
   "-Wextra"
 )
 
 target_compile_features(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   cxx_std_14
 )
 

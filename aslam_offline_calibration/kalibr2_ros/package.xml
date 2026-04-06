@@ -26,6 +26,8 @@
 
   <test_depend>ament_cmake_gtest</test_depend>
 
+  <build_depend>libopencv-dev</build_depend>
+  <build_depend>incremental_calibration</build_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

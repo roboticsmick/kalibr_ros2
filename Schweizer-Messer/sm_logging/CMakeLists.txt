@@ -5,6 +5,7 @@ project(sm_logging
   DESCRIPTION "Logging utilities"
   LANGUAGES CXX
 )
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 find_package(Boost REQUIRED COMPONENTS regex system thread)

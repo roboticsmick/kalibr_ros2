@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="3">
+  <name>aslam_backend</name>
+  <version>0.0.1</version>
+  <description>aslam_backend</description>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>New BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>suitesparse</build_depend>
+  <build_depend>sm_boost</build_depend>
+  <build_depend>sm_logging</build_depend>
+  <build_depend>sm_property_tree</build_depend>
+  <build_depend>sm_random</build_depend>
+  <build_depend>sm_timing</build_depend>
+  <build_depend>sparse_block_matrix</build_depend>
+  <build_depend>tbb</build_depend>
+
+  <exec_depend>sm_boost</exec_depend>
+  <exec_depend>sm_logging</exec_depend>
+  <exec_depend>sm_property_tree</exec_depend>
+  <exec_depend>sm_random</exec_depend>
+  <exec_depend>sm_timing</exec_depend>
+  <exec_depend>sparse_block_matrix</exec_depend>
+  <exec_depend>tbb</exec_depend>
+
+  <build_depend>eigen</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>boost</build_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
