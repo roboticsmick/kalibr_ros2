@@ -29,6 +29,6 @@
   <build_depend>sm_eigen</build_depend>
   <build_depend>boost</build_depend>
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>cmake</build_type>
   </export>
 </package>

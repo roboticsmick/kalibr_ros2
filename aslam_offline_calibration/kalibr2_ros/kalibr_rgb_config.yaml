@@ -16,13 +16,18 @@ board:
 
 cameras:
   rgb_imx577:
-    # pinhole-radtan: standard pinhole projection + radial-tangential distortion
-    # Matches the model used by DepthAI EEPROM and survey_ros2 capture_node.py
-    model: 'pinhole-radtan'
+    # pinhole-equi: pinhole projection + equidistant (Kannala-Brandt) fisheye distortion.
+    # Required for the IMX577's 113° HFOV lens — pinhole-radtan breaks down above ~100° FOV.
+    # NOTE: the keyword must be exactly 'pinhole-equi', not 'pinhole-equidistant'.
+    model: 'pinhole-equi'
 
-    # Initial focal length guess in pixels for 1920px width, ~3.84 mm lens, 1.55 μm pixel
-    # fx ≈ focal_mm / pixel_size_mm = 3.84 / 0.00155 ≈ 2477 px
-    focal_length_fallback: 2477.0
+    # Initial focal length guess in pixels at 1920px width for 113° HFOV lens:
+    #   fx = image_width / (2 × tan(HFOV / 2))
+    #      = 1920 / (2 × tan(56.5°))
+    #      = 1920 / (2 × 1.5108)
+    #      ≈ 635 px
+    # (The old value 2477.0 was computed from a narrow-angle lens formula and is wrong here.)
+    focal_length_fallback: 635.0
 
     source:
       # Path to the recorded ROS2 bag (MCAP format)

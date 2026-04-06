@@ -31,6 +31,6 @@
   <build_depend>aslam_time</build_depend>
   <build_depend>aslam_cv_error_terms</build_depend>
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>cmake</build_type>
   </export>
 </package>

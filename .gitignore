@@ -23,6 +23,7 @@
 # temporary editor files
 *~
 *.orig
+devel/
 
 # Compiled python.
 tools/lint/autolintc
