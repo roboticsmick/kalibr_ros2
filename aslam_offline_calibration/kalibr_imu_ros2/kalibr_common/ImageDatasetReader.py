@@ -178,6 +178,11 @@ class BagImageDatasetReader(object):
         np.random.shuffle(indices)
         return BagImageDatasetReaderIterator(self, indices)
 
+    @property
+    def index(self):
+        """Alias for self.indices — used by IccSensors to count images."""
+        return self.indices
+
     def numImages(self):
         return len(self.indices)
 

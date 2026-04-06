@@ -6,6 +6,7 @@ from .plotCoordinateFrame import plotCoordinateFrame
 from .Progress import Progress
 from .Progress import Progress2
 from .saveFigTight import saveFigTight
+from .PlotCollection import PlotCollection
 
 
 def logInfo(message):

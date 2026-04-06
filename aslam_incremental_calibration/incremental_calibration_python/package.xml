@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="3">
+  <name>incremental_calibration_python</name>
+  <version>0.0.1</version>
+  <description>Python bindings for incremental_calibration (ported from Kalibr ROS1)</description>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>LGPL</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <build_depend>python_module</build_depend>
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>aslam_backend</build_depend>
+  <build_depend>aslam_backend_python</build_depend>
+  <build_depend>incremental_calibration</build_depend>
+  <build_depend>sm_property_tree</build_depend>
+  <build_depend>sm_python</build_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

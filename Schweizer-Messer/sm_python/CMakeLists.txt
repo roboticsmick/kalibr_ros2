@@ -4,6 +4,7 @@ project(sm_python)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(numpy_eigen REQUIRED)
 find_package(sm_common REQUIRED)
@@ -64,6 +65,14 @@ target_link_libraries(${PY_PROJECT_NAME}
 
 install(DIRECTORY include/
   DESTINATION include
+)
+
+# Install Python source files alongside the compiled extension so that
+# __init__.py, PlotCollection.py, etc. are available at import time.
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(DIRECTORY python/sm/
+  DESTINATION "${PYTHON_INSTALL_DIR}/sm"
+  FILES_MATCHING PATTERN "*.py"
 )
 
 ament_export_include_directories(include)

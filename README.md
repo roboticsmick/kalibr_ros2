@@ -57,9 +57,9 @@ It consumes a dataset from a recorded rosbag with an aprilgrid target of 6x5 tag
 board:
   target_type: 'aprilgrid' # grid type
   tagCols: 6               # number of apriltags in the x direction
-  tagRows: 5               # number of apriltags in the y direction
-  tagSize: 0.088           # size of apriltag, edge to edge [m]
-  tagSpacing: 0.2954       # ratio of space between tags to tagSize
+  tagRows: 6               # number of apriltags in the y direction
+  tagSize: 0.045           # size of apriltag, edge to edge [m]
+  tagSpacing: 0.3          # ratio of space between tags to tagSize
 
 cameras:
   camera_1_name:
@@ -124,7 +124,7 @@ Two tools are involved — record **one bag**, run them in sequence:
 
 ### Prerequisites
 
-1. **Print the AprilGrid** defined in `kalibr_aprilgrid.yaml` (6×6, 88 mm tags, 0.3 spacing).
+1. **Print the AprilGrid** defined in `kalibr_aprilgrid.yaml` (6×6, 45 mm tags, 0.3 spacing).
    Print on A3 at 100% scale, verify tag size with a ruler, mount flat on a rigid board.
 
 2. **Source the workspace:**
@@ -192,13 +192,16 @@ ros2 run kalibr2_ros kalibr_calibrate_cameras \
 ```
 
 The config (`kalibr_rgb_config.yaml`) is pre-configured for the IMX577:
-- `model: 'pinhole-equi'` — equidistant fisheye model required for the 113° HFOV lens
-- `focal_length_fallback: 635.0` — initial guess: `fx = 1920 / (2 × tan(56.5°)) ≈ 635 px`
 
-> **Why `pinhole-equi`, not `pinhole-radtan`?**  
-> The IMX577 on the OAK-FFC-3P-HQ113 has a 113° horizontal FOV. `pinhole-radtan` cannot
-> accurately model lenses above ~100° FOV. `pinhole-equi` (Kannala-Brandt) is designed for
-> fisheye optics and produces correct results at this FOV.
+- `model: 'pinhole-radtan'` — radial-tangential model for the corrected wide-angle lens
+- `focal_length_fallback: 806.0` — initial guess: `fx = 1920 / (2 × tan(50°)) ≈ 806 px`
+
+> **Why `pinhole-radtan`, not `pinhole-equi`?**  
+> Despite the 113° diagonal FOV, the M12 HQ113 lens spec states **Distortion: <-1.5%**.
+> Fisheye lenses at this FOV have 30–50%+ distortion. A corrected wide-angle lens with 1.5%
+> distortion behaves like a rectilinear projection and is correctly modelled with `radtan`.
+> Using `pinhole-equi` here causes the optimizer to diverge (~485 px RMSE). Basalt also
+> confirms `radtan` is correct — it uses `pinhole-radtan8` for this lens successfully.
 
 > **Do I need to provide HFOV or the DepthAI extrinsics JSON?**  
 > No. Only `focal_length_fallback` is needed as an initial guess — Kalibr optimises it from

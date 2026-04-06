@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(numpy_eigen REQUIRED)
 find_package(aslam_splines REQUIRED)
@@ -52,5 +53,10 @@ target_link_libraries(${PROJECT_NAME}
   sm_timing::sm_timing
 )
 
-# handled by add_python_export_library
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(DIRECTORY python/aslam_splines/
+  DESTINATION "${PYTHON_INSTALL_DIR}/aslam_splines"
+  FILES_MATCHING PATTERN "*.py"
+)
+
 ament_package()

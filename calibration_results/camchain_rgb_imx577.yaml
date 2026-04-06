@@ -1,0 +1,8 @@
+cam0:
+  camera_model: pinhole
+  distortion_model: radtan
+  intrinsics: [805.474, 805.255, 955.215, 547.513]   # [fx, fy, cx, cy] from calibration_rgb_imx577.yaml
+  distortion_coeffs: [-0.00654801, 0.00541622, 0.000516862, -0.00166389]
+  resolution: [1920, 1080]
+  rostopic: /oak/rgb/image_raw
+  cam_overlaps: []

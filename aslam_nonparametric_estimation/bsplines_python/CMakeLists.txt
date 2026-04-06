@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(numpy_eigen REQUIRED)
 find_package(bsplines REQUIRED)
@@ -32,6 +33,12 @@ target_link_libraries(${PROJECT_NAME}
   ${Python3_LIBRARIES}
   bsplines::bsplines
   sm_kinematics::sm_kinematics
+)
+
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(DIRECTORY python/bsplines/
+  DESTINATION "${PYTHON_INSTALL_DIR}/bsplines"
+  FILES_MATCHING PATTERN "*.py"
 )
 
 ament_package()

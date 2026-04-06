@@ -5,6 +5,9 @@ project(incremental_calibration
   LANGUAGES CXX
 )
 
+# Required for linking into Python extension shared libraries
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 find_package(aslam_backend REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(Eigen3 REQUIRED)

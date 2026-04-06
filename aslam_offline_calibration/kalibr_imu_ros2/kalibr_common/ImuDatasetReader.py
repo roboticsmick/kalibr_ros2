@@ -73,10 +73,10 @@ class BagImuDatasetReader(object):
         # _messages[i] = (data_msg, bag_stamp_nanosec)
         self._messages = []
         while reader.has_next():
-            topic, raw_data, t_ns in reader.read_next():
-                if topic == imutopic:
-                    msg = deserialize_message(raw_data, msg_type)
-                    self._messages.append((msg, t_ns))
+            topic, raw_data, t_ns = reader.read_next()
+            if topic == imutopic:
+                msg = deserialize_message(raw_data, msg_type)
+                self._messages.append((msg, t_ns))
 
         if not self._messages:
             raise RuntimeError("No messages found on topic '{}' in '{}'.".format(imutopic, bagfile))
@@ -149,6 +149,11 @@ class BagImuDatasetReader(object):
         indices = self.indices.copy()
         np.random.shuffle(indices)
         return BagImuDatasetReaderIterator(self, indices)
+
+    @property
+    def index(self):
+        """Alias for self.indices — used by IccSensors to count messages."""
+        return self.indices
 
     def numMessages(self):
         return len(self.indices)

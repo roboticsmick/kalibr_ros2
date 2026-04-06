@@ -11,26 +11,27 @@ board:
   target_type: 'aprilgrid'
   tagCols: 6
   tagRows: 6
-  tagSize: 0.088        # metres — must match kalibr_aprilgrid.yaml
+  tagSize: 0.045        # metres — must match kalibr_aprilgrid.yaml
   tagSpacing: 0.3       # gap/tagSize ratio — must match kalibr_aprilgrid.yaml
 
 cameras:
   rgb_imx577:
-    # pinhole-equi: pinhole projection + equidistant (Kannala-Brandt) fisheye distortion.
-    # Required for the IMX577's 113° HFOV lens — pinhole-radtan breaks down above ~100° FOV.
-    # NOTE: the keyword must be exactly 'pinhole-equi', not 'pinhole-equidistant'.
-    model: 'pinhole-equi'
+    # pinhole-radtan: pinhole projection + radial-tangential (Brown-Conrady) distortion.
+    # The IMX577 on the M12 HQ113 lens is a CORRECTED wide-angle lens with <1.5% distortion.
+    # Corrected wide-angle lenses behave like rectilinear projections and are modelled with
+    # radtan. pinhole-equi (Kannala-Brandt) is for fisheye lenses with 20-50%+ distortion;
+    # using it here causes the optimizer to diverge (confirmed: ~485 px RMSE).
+    model: 'pinhole-radtan'
 
-    # Initial focal length guess in pixels at 1920px width for 113° HFOV lens:
+    # Initial focal length guess in pixels at 1920px width for 100° HFOV rectilinear lens:
     #   fx = image_width / (2 × tan(HFOV / 2))
-    #      = 1920 / (2 × tan(56.5°))
-    #      = 1920 / (2 × 1.5108)
-    #      ≈ 635 px
-    # (The old value 2477.0 was computed from a narrow-angle lens formula and is wrong here.)
-    focal_length_fallback: 635.0
+    #      = 1920 / (2 × tan(50°))
+    #      = 1920 / (2 × 1.1918)
+    #      ≈ 806 px
+    focal_length_fallback: 806.0
 
     source:
       # Path to the recorded ROS2 bag (MCAP format)
       # Update this path to wherever you saved the calibration recording
-      rosbag_path: '/media/logic/USamsung/ros2_ws/calibration_bags/rgb_imu_calibration'
+      rosbag_path: '/media/logic/USamsung/ros2_ws/calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0.mcap'
       topic: '/oak/rgb/image_raw'

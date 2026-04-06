@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(numpy_eigen REQUIRED)
 find_package(aslam_backend REQUIRED)
@@ -59,5 +60,11 @@ install(DIRECTORY include/
 )
 
 ament_export_include_directories(include/${PROJECT_NAME})
+
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(DIRECTORY python/aslam_backend/
+  DESTINATION "${PYTHON_INSTALL_DIR}/aslam_backend"
+  FILES_MATCHING PATTERN "*.py"
+)
 
 ament_package()

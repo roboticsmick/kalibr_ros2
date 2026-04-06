@@ -23,6 +23,6 @@ tagCols: 6          # Number of AprilTag columns
 tagRows: 6          # Number of AprilTag rows
 
 # Physical dimensions (MEASURE AFTER PRINTING)
-tagSize: 0.088      # Edge length of one AprilTag in metres (88 mm for A3 print)
+tagSize: 0.045      # Edge length of one AprilTag in metres (45 mm for A3 print)
 tagSpacing: 0.3     # Ratio of gap between tags to tag edge length (dimensionless)
-                    # Gap = tagSize * tagSpacing = 88 mm * 0.3 = 26.4 mm
+                    # Gap = tagSize * tagSpacing = 45 mm * 0.3 = 13.5 mm

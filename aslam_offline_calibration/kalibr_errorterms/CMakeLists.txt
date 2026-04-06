@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(numpy_eigen REQUIRED)
 find_package(aslam_backend REQUIRED)
@@ -51,9 +52,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 ##################################
 # Python bindings
 ##################################
-# The ".." path places the .so one level up (in kalibr_errorterms_python/)
-# so it can be imported as "import kalibr_errorterms_python" directly.
-add_python_export_library(${PROJECT_NAME}_python python/${PROJECT_NAME}_python/..
+add_python_export_library(${PROJECT_NAME}_python python/kalibr_errorterms
   src/module.cpp
 )
 
@@ -78,4 +77,11 @@ install(DIRECTORY include/
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(DIRECTORY python/kalibr_errorterms/
+  DESTINATION "${PYTHON_INSTALL_DIR}/kalibr_errorterms"
+  FILES_MATCHING PATTERN "*.py"
+)
+
 ament_package()

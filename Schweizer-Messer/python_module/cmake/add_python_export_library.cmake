@@ -45,8 +45,11 @@ FUNCTION(add_python_export_library TARGET_NAME PYTHON_MODULE_DIRECTORY)
   # Build the extension module as a shared library
   add_library(${TARGET_NAME} SHARED ${ARGN})
 
-  # Python extension modules must NOT carry a "lib" prefix
-  set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
+  # All Boost.Python modules in this project use BOOST_PYTHON_MODULE(libXxx), which exports
+  # PyInit_libXxx. The output filename must therefore carry the "lib" prefix so Python can
+  # find the correct PyInit function. This matches the ROS1/catkin behaviour where shared
+  # libraries were always named libXxx.so.
+  set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "lib" SUFFIX ".so")
 
   # Link against Python 3 runtime and Boost.Python
   target_link_libraries(${TARGET_NAME}
