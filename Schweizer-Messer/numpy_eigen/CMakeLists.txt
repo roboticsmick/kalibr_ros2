@@ -4,6 +4,7 @@ project(numpy_eigen)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(python_module REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
@@ -35,6 +36,15 @@ target_link_libraries(${PROJECT_NAME}
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}
+)
+
+# Install __init__.py so that 'import numpy_eigen' actually loads libnumpy_eigen
+# and registers the numpy <-> Eigen matrix converters. Without this the package
+# directory is empty and every C++ function that accepts an Eigen matrix will
+# reject numpy array arguments.
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
+install(FILES src/${PROJECT_NAME}/__init__.py
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
 )
 
 ament_export_include_directories(include)

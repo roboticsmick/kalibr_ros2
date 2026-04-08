@@ -106,6 +106,7 @@ def parseArgs():
     outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
     outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Export the optimized poses into a CSV (time_ns, position, quaterion)')
+    outputSettings.add_argument('--num-threads', type=int, default=4, dest='num_threads', help='Max. worker processes for corner extraction (default: %(default)s). Lower this on memory-constrained machines.')
 
     #print help if no argument is specified
     if len(sys.argv)==1:

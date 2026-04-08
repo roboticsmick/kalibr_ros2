@@ -40,30 +40,43 @@ def extractCornersFromDataset(dataset, detector, multithreading=False, numProces
     iProgress = sm.Progress2(numImages)
     iProgress.sample()
             
-    if multithreading:   
+    if multithreading:
         if not numProcesses:
             numProcesses = max(1,multiprocessing.cpu_count()-1)
-        try:      
-            manager = multiprocessing.Manager()
-            resultq = manager.Queue()
-            manager2 = multiprocessing.Manager()
-            taskq = manager2.Queue()
-            
+        try:
+            # Use plain multiprocessing.Queue (not Manager.Queue) so items are
+            # pickled/unpickled directly in the worker without a proxy server.
+            # Manager.Queue double-proxies numpy arrays and breaks numpy_eigen
+            # converters; it also spawns extra server processes unnecessarily.
+            resultq = multiprocessing.Queue()
+            taskq = multiprocessing.Queue()
+
             for idx, (timestamp, image) in enumerate(dataset.readDataset()):
                 taskq.put( (idx, timestamp, image) )
                 
+            collected = []
             plist=list()
             for pidx in range(0, numProcesses):
                 detector_copy = copy.copy(detector)
                 p = multiprocessing.Process(target=multicoreExtractionWrapper, args=(detector_copy, taskq, resultq, clearImages, noTransformation, ))
                 p.start()
                 plist.append(p)
-            
-            #wait for results
+
+            # Drain the result queue continuously while waiting for workers.
+            # This is required to prevent a deadlock: workers block trying to put
+            # large observation objects into the queue once the OS pipe buffer
+            # (~64 KB) fills up, but the main process only reads AFTER all workers
+            # finish — a classic circular wait.
             last_done=0
             while 1:
+                # Drain whatever is already available
+                while True:
+                    try:
+                        collected.append(resultq.get_nowait())
+                    except queue.Empty:
+                        break
                 if all([not p.is_alive() for p in plist]):
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     break
                 done = numImages-taskq.qsize()
                 sys.stdout.flush()
@@ -71,17 +84,19 @@ def extractCornersFromDataset(dataset, detector, multithreading=False, numProces
                     iProgress.sample(done-last_done)
                 last_done = done
                 time.sleep(0.5)
-            resultq.put('STOP')
+            # Final drain after all workers have exited
+            while True:
+                try:
+                    collected.append(resultq.get_nowait())
+                except queue.Empty:
+                    break
         except Exception as e:
             raise RuntimeError("Exception during multithreaded extraction: {0}".format(e))
         
-        #get result sorted by time (=idx)
-        if resultq.qsize() > 1:
-            targetObservations = [[]]*(resultq.qsize()-1)
-            for lidx, data in enumerate(iter(resultq.get, 'STOP')):
-                obs=data[0]; time_idx = data[1]
-                targetObservations[lidx] = (time_idx, obs)
-            targetObservations = list(zip(*sorted(targetObservations, key=lambda tup: tup[0])))[1]
+        #get result sorted by time (=idx) — already collected above to prevent deadlock
+        if collected:
+            sortedObs = sorted(collected, key=lambda tup: tup[1])
+            targetObservations = [obs for obs, idx in sortedObs]
         else:
             targetObservations=[]
     

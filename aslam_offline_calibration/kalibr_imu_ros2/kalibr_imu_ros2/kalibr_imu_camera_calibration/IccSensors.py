@@ -40,7 +40,7 @@ def initImuBagDataset(bagfile, topic, from_to=None, perform_synchronization=Fals
 #mono camera
 class IccCamera():
     def __init__(self, camConfig, targetConfig, dataset, reprojectionSigma=1.0, showCorners=True, \
-                 showReproj=True, showOneStep=False):
+                 showReproj=True, showOneStep=False, numThreads=4):
         
         #store the configuration
         self.dataset = dataset
@@ -62,7 +62,7 @@ class IccCamera():
         #extract corners
         self.setupCalibrationTarget( targetConfig, showExtraction=showCorners, showReproj=showReproj, imageStepping=showOneStep )
         multithreading = not (showCorners or showReproj or showOneStep)
-        self.targetObservations = kc.extractCornersFromDataset(self.dataset, self.detector, multithreading=multithreading)
+        self.targetObservations = kc.extractCornersFromDataset(self.dataset, self.detector, multithreading=multithreading, numProcesses=numThreads)
         
         #an estimate of the gravity in the world coordinate frame  
         self.gravity_w = np.array([9.80655, 0., 0.])
@@ -423,14 +423,15 @@ class IccCameraChain():
                                            parsed.bag_from_to, parsed.bag_freq, parsed.perform_synchronization)
             
             #create the camera
-            self.camList.append( IccCamera( camConfig, 
-                                            targetConfig, 
-                                            dataset, 
+            self.camList.append( IccCamera( camConfig,
+                                            targetConfig,
+                                            dataset,
                                             #Ultimately, this should come from the camera yaml.
-                                            reprojectionSigma=parsed.reprojection_sigma, 
+                                            reprojectionSigma=parsed.reprojection_sigma,
                                             showCorners=parsed.showextraction,
-                                            showReproj=parsed.showextraction, 
-                                            showOneStep=parsed.extractionstepping) )  
+                                            showReproj=parsed.showextraction,
+                                            showOneStep=parsed.extractionstepping,
+                                            numThreads=parsed.num_threads) )  
                 
         self.chainConfig = chainConfig
         

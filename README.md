@@ -271,13 +271,14 @@ to the BMI270 IMU frame, plus the temporal offset between their clocks.
 > No orientation prior, no extrinsics guess, and no DepthAI JSON are needed.
 
 ```bash
-cd /media/logic/USamsung/ros2_ws
+cd /media/logic/USamsung/ros2_ws && source /opt/ros/jazzy/setup.bash && source install/setup.bash && \
 ros2 run kalibr_imu_ros2 kalibr_calibrate_imu_camera \
-  --bag calibration_bags/rgb_imu_calibration \
-  --cams src/kalibr_ros2/calibration_results/camchain_rgb_imx577.yaml \
+  --bag calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0.mcap \
+  --cam src/kalibr_ros2/calibration_results/camchain_rgb_imx577.yaml \
   --imu src/kalibr_ros2/kalibr_bmi270_imu.yaml \
   --target src/kalibr_ros2/kalibr_aprilgrid.yaml \
-  --dont-show-report
+  --dont-show-report \
+  --num-threads 4 2>&1
 ```
 
 Output files are written **alongside the bag directory** (no `--output-dir` flag):

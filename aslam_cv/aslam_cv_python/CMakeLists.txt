@@ -69,7 +69,11 @@ target_link_libraries(${PROJECT_NAME}
   ${OpenCV_LIBS}
   aslam_cameras::aslam_cameras
   aslam_imgproc::aslam_imgproc
-  aslam_cv_serialization::aslam_cv_serialization
+  # Use WHOLE_ARCHIVE to force all BOOST_CLASS_EXPORT_IMPLEMENT static initializers from
+  # aslam_cv_serialization.a to be included. Without this, the linker drops unreferenced
+  # object files, so DistortedPinholeCameraGeometry and other camera type registrations
+  # never run, causing a Boost.Serialization assert when GridDetector is pickled.
+  $<LINK_LIBRARY:WHOLE_ARCHIVE,aslam_cv_serialization::aslam_cv_serialization>
 )
 
 install(DIRECTORY include/
