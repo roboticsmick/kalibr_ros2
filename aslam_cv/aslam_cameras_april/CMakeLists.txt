@@ -145,4 +145,6 @@ install(DIRECTORY python/aslam_cameras_april/
 enable_testing()
 add_subdirectory(test)
 
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_include_directories(include)
 ament_package()
