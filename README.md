@@ -182,7 +182,7 @@ Stop recording with Ctrl-C in Terminal 2, then Ctrl-C in Terminal 1.
 
 ### Step 1: Camera Intrinsics
 
-Calibrates focal length, principal point, and equidistant distortion coefficients.
+Calibrates focal length, principal point, and radial-tangential distortion coefficients.
 
 ```bash
 cd /media/logic/USamsung/ros2_ws
@@ -246,7 +246,7 @@ k: [fx, 0,  cx,
 ```yaml
 cam0:
   camera_model: pinhole            # always 'pinhole' for this tool
-  distortion_model: equidistant    # matches 'pinhole-equi' used in Step 1
+  distortion_model: radtan         # matches 'pinhole-radtan' used in Step 1
   intrinsics: [FX, FY, CX, CY]    # fill from calibration_rgb_imx577.yaml k matrix
   distortion_coeffs: [K1, K2, K3, K4]  # fill from d[] in Step 1 output (4 values)
   resolution: [1920, 1080]
@@ -255,8 +255,8 @@ cam0:
 ```
 
 > **Note the naming difference:**  
-> Step 1 config uses `model: 'pinhole-equi'` (C++ format).  
-> Step 2 camchain uses `camera_model: pinhole` + `distortion_model: equidistant` (Python format).  
+> Step 1 config uses `model: 'pinhole-radtan'` (C++ format).  
+> Step 2 camchain uses `camera_model: pinhole` + `distortion_model: radtan` (Python format).  
 > These are the same model expressed differently — both tools must see consistent values.
 
 ---
@@ -281,18 +281,33 @@ ros2 run kalibr_imu_ros2 kalibr_calibrate_imu_camera \
   --num-threads 4 2>&1
 ```
 
-Output files are written **alongside the bag directory** (no `--output-dir` flag):
+Output files are written **alongside the bag file** (named from the `.mcap` filename, no `--output-dir` flag):
 ```
-calibration_bags/rgb_imu_calibration-camchain-imucam.yaml   ← T_cam_imu + timeshift
-calibration_bags/rgb_imu_calibration-imu.yaml               ← refined IMU parameters
-calibration_bags/rgb_imu_calibration-results-imucam.txt     ← text summary
-calibration_bags/rgb_imu_calibration-report-imucam.pdf      ← visual report
+calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-camchain-imucam.yaml   ← T_cam_imu + timeshift
+calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-imu.yaml               ← refined IMU parameters
+calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-results-imucam.txt     ← text summary
 ```
+A copy is also saved to `src/kalibr_ros2/calibration_results/imu_camera_chain_rgb_bmi270.yaml`.
 
 **Quality targets** (check `*-results-imucam.txt`):
 - Reprojection error: < 1.0 px (< 0.5 px is excellent)
 - `|timeshift_cam_imu|`: typically < 10 ms for USB3 hardware sync
 - Gyroscope residual RMS: < 0.01 rad/s
+
+**Verified results (OAK-FFC-3P, BMI270, 102 s bag):**
+```
+Reprojection error (cam0):    mean 0.81 px, median 0.57 px, std 0.68 px  ✓
+Gyroscope error (imu0):       mean 0.0033 rad/s                           ✓
+Accelerometer error (imu0):   mean 0.054 m/s²                            ✓
+timeshift_cam_imu:            −6.5 ms                                     ✓
+T_cam_imu (imu0 → cam0):
+  [[ 0.00765  -0.99989  -0.01283   0.04808]
+   [-0.00972  -0.01290   0.99987  -0.06986]
+   [-0.99992  -0.00752  -0.00982  -0.04394]
+   [ 0.        0.        0.        1.     ]]
+```
+
+The ~90° rotation permutation is expected — the BMI270 axes are aligned with the PCB, not the camera optical frame.
 
 **Optional — downsample extraction rate** on very long bags (speeds up the AprilGrid
 detection pass):
@@ -324,10 +339,11 @@ extrinsics in one step. Either argument can be omitted to update only one set of
 | `kalibr_aprilgrid.yaml` | AprilGrid target definition (shared by both tools) |
 | `kalibr_bmi270_imu.yaml` | BMI270 noise params; `rostopic: /oak/imu/data`; `update_rate: 200` |
 | `depthai_ros_driver/config/oak_ffc_3p_rgb_calibration.yaml` | Driver config for recording (1920×1080, 10 FPS, IMU 200 Hz, no YOLO) |
-| `aslam_offline_calibration/kalibr2_ros/kalibr_rgb_config.yaml` | Step 1 input: `pinhole-equi`, `focal_length_fallback: 635.0` |
+| `aslam_offline_calibration/kalibr2_ros/kalibr_rgb_config.yaml` | Step 1 input: `pinhole-radtan`, `focal_length_fallback: 806.0` |
 | `calibration_results/calibration_rgb_imx577.yaml` | Step 1 output: CameraInfo intrinsics |
 | `calibration_results/camchain_rgb_imx577.yaml` | Step 2 input (created manually): camchain format for IMU tool |
-| `<bag>-camchain-imucam.yaml` | Step 3 output: T_cam_imu rotation, translation, timeshift |
+| `calibration_results/imu_camera_chain_rgb_bmi270.yaml` | Step 3 output copy: T_cam_imu, timeshift |
+| `<bag_dir>/<bag>_0-camchain-imucam.yaml` | Step 3 output (primary, written next to bag file) |
 | `survey_ros2/config/camera_calibration.yaml` | Final destination updated by `apply_kalibr_calibration.py` |
 
 ---
@@ -341,9 +357,13 @@ extrinsics in one step. Either argument can be omitted to update only one set of
 (move more slowly at 10 FPS), insufficient corner coverage (visit all image corners and
 edges), or the target was not printed at the correct scale (re-measure the tag size).
 
-**`distortion_model 'equidistant' requires 4 coefficients`** — When building
+**`distortion_model 'radtan' requires 4 coefficients`** — When building
 `camchain_rgb_imx577.yaml`, verify `distortion_coeffs` has exactly 4 values from the `d`
 field in `calibration_rgb_imx577.yaml`.
+
+**System crash / OOM during corner extraction** — Without `--num-threads`, the tool spawns
+`cpu_count()-1` worker processes. On a 16-core machine this is 15 processes × ~500 MB each ≈ 7+ GB
+just for workers. Always pass `--num-threads 4` (or lower) to cap this.
 
 **IMU calibration diverges / does not converge** — The noise values in `kalibr_bmi270_imu.yaml`
 are from the BMI270 datasheet (minimum bounds). Real-world values depend on PCB layout and
