@@ -1,0 +1,39 @@
+# kalibr_ros2 camera intrinsics calibration config for OAK-FFC-3P-HQ83 IMX577 (RGB camera)
+#
+# Used by: ros2 run kalibr2_ros kalibr_calibrate_cameras
+#
+# Lens: M12 HQ83 — IMX577, 83.6° stated HFOV (OAK-FFC-3P-HQ83-RGB-ONLY.json)
+#
+# This calibrates the camera INTRINSICS ONLY (focal length, principal point, distortion).
+# The IMU-to-camera extrinsics are calibrated separately with kalibr_calibrate_imu_camera.
+#
+# INPUT BAG: recorded with oak_ffc_3p_rgb_calibration.yaml (10 FPS, 1920x1080)
+#
+board:
+  target_type: 'aprilgrid'
+  tagCols: 6
+  tagRows: 6
+  tagSize: 0.045        # metres — must match kalibr_aprilgrid.yaml
+  tagSpacing: 0.3       # gap/tagSize ratio — must match kalibr_aprilgrid.yaml
+
+cameras:
+  rgb_imx577:
+    # pinhole-radtan: pinhole projection + radial-tangential (Brown-Conrady) distortion.
+    # The HQ83 is a corrected wide-angle lens at 83.6° HFOV — even less distortion than the
+    # HQ113. Corrected wide-angle lenses behave like rectilinear projections and are modelled
+    # with radtan. pinhole-equi (Kannala-Brandt) is for fisheye lenses with 20-50%+ distortion.
+    model: 'pinhole-radtan'
+
+    # Initial focal length guess in pixels at 1920px width for 83.6° HFOV rectilinear lens:
+    #   fx = image_width / (2 × tan(HFOV / 2))
+    #      = 1920 / (2 × tan(41.8°))
+    #      = 1920 / (2 × 0.8941)
+    #      ≈ 1074 px
+    focal_length_fallback: 1074.0
+
+    source:
+      # Path to the recorded ROS2 bag (MCAP format)
+      # Override at runtime with --bag to avoid editing this file:
+      #   ros2 run kalibr2_ros kalibr_calibrate_cameras --config ... --bag path/to/bag.mcap
+      rosbag_path: '/media/logic/USamsung/ros2_ws/calibration_bags/26_04_09_rgb_imu_calibration/26_04_09_rgb_imu_calibration_0.mcap'
+      topic: '/oak/rgb/image_raw'

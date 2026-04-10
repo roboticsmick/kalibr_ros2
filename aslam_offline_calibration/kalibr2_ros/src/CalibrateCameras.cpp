@@ -100,10 +100,14 @@ int main(int argc, char** argv) {
   bool verbose = false;
   app.add_flag("--verbose", verbose, "Enable verbose output during calibration.");
 
+  std::optional<std::string> override_bag;
+  app.add_option("--bag", override_bag,
+                 "Path to a ROS 2 bag (.mcap) to use instead of the rosbag_path in the config YAML.");
+
   CLI11_PARSE(app, argc, argv);
   // | --- User side setup --- |
   // "/kalibr/aslam_offline_calibration/kalibr2_ros/calibration_config.yaml"
-  CalibrationConfig config = kalibr2::ros::ConfigFromYaml(bag_path);
+  CalibrationConfig config = kalibr2::ros::ConfigFromYaml(bag_path, override_bag);
 
   std::vector<boost::shared_ptr<kalibr2::CameraCalibratorBase>> camera_calibrators;
   for (const auto& camera_config : config.cameras) {

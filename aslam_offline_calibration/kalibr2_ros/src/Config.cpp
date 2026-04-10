@@ -32,7 +32,8 @@ boost::shared_ptr<aslam::cameras::GridCalibrationTargetBase> ParseTarget(const Y
   }
 }
 
-CameraConfig ParseCamera(const std::string& camera_name, const YAML::Node& camera_config) {
+CameraConfig ParseCamera(const std::string& camera_name, const YAML::Node& camera_config,
+                         const std::optional<std::string>& override_bag_path = std::nullopt) {
   if (!camera_config) {
     throw std::runtime_error("Camera configuration is missing");
   }
@@ -49,7 +50,7 @@ CameraConfig ParseCamera(const std::string& camera_name, const YAML::Node& camer
     throw std::runtime_error("Camera configuration missing 'source' section");
   }
 
-  std::string rosbag_path = source["rosbag_path"].as<std::string>();
+  std::string rosbag_path = override_bag_path.value_or(source["rosbag_path"].as<std::string>());
   std::string topic = source["topic"].as<std::string>();
 
   auto reader = BagImageReaderFactory::create(rosbag_path, topic);
@@ -59,7 +60,8 @@ CameraConfig ParseCamera(const std::string& camera_name, const YAML::Node& camer
 
 }  // anonymous namespace
 
-CalibrationConfig ConfigFromYaml(const std::string& yaml_path) {
+CalibrationConfig ConfigFromYaml(const std::string& yaml_path,
+                                 const std::optional<std::string>& override_bag_path) {
   YAML::Node config_yaml;
   try {
     config_yaml = YAML::LoadFile(yaml_path);
@@ -83,7 +85,7 @@ CalibrationConfig ConfigFromYaml(const std::string& yaml_path) {
   const auto& cameras = config_yaml["cameras"];
   for (const auto& camera_node : cameras) {
     std::string camera_name = camera_node.first.as<std::string>();
-    config.cameras.emplace_back(ParseCamera(camera_name, camera_node.second));
+    config.cameras.emplace_back(ParseCamera(camera_name, camera_node.second, override_bag_path));
   }
 
   return config;

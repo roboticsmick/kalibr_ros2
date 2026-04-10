@@ -25,8 +25,10 @@ struct CalibrationConfig {
 
 /// @brief Load calibration configuration from a YAML file
 /// @param yaml_path Path to the YAML configuration file
+/// @param override_bag_path If set, replaces the rosbag_path for every camera in the config
 /// @return CalibrationConfig populated from the YAML file
 /// @throws std::runtime_error if the file cannot be read or parsed
-CalibrationConfig ConfigFromYaml(const std::string& yaml_path);
+CalibrationConfig ConfigFromYaml(const std::string& yaml_path,
+                                 const std::optional<std::string>& override_bag_path = std::nullopt);
 
 }  // namespace kalibr2::ros

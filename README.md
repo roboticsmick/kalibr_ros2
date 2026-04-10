@@ -100,6 +100,7 @@ Options:
                               Full path to calibration configuration YAML file.
   -o,--output-dir TEXT:DIR REQUIRED
                               Directory to save the calibration results.
+  --bag TEXT                  Path to a ROS 2 bag (.mcap) to use instead of the rosbag_path in the config YAML.
   --approx-sync-tolerance FLOAT
                               Tolerance for approximate synchronization of observations across cameras (in seconds).
   --mi-tol FLOAT              The tolerance on the mutual information for adding an image. Higher means fewer images will be added. Use -1 to force all images.
@@ -122,6 +123,39 @@ Two tools are involved — record **one bag**, run them in sequence:
 
 ---
 
+### Choosing the right config for your lens
+
+Kalibr requires an initial focal length guess (`focal_length_fallback`) that depends on the
+lens fitted to the IMX577. **Pick the config that matches the board JSON in**
+`depthai-ros/assets/depthai-core_calibration/`.
+
+| Lens      | Board JSON                    | HFOV (deg) | focal_length_fallback | Config file                  |
+|-----------|-------------------------------|------------|-----------------------|------------------------------|
+| M12 HQ113 | OAK-FFC-3P-HQ113.json         | 113        | 806 px                | kalibr_rgb_config.yaml       |
+| M12 HQ83  | OAK-FFC-3P-HQ83-RGB-ONLY.json | 83.6       | 1074 px               | kalibr_rgb_hq83_config.yaml  |
+
+The formula for deriving `focal_length_fallback`:
+
+```text
+fx = image_width / (2 × tan(HFOV / 2))
+```
+
+This is only an **initial guess** — Kalibr optimises the final value from the data.
+If you add a new lens, create a copy of any config and update `focal_length_fallback`.
+
+> **Why `pinhole-radtan` for both lenses?**
+> Both M12 HQ lenses are corrected wide-angle lenses with stated distortion < 1.5%.
+> Fisheye lenses have 30–50%+ distortion and require `pinhole-equi`. A corrected
+> wide-angle lens behaves like a rectilinear projection and is correctly modelled with
+> `radtan`. Using `pinhole-equi` here causes the optimizer to diverge (~485 px RMSE).
+> Basalt confirms `radtan` is correct — it uses `pinhole-radtan8` for these lenses.
+
+> **Do I need to provide the DepthAI calibration JSON?**
+> No. Only `focal_length_fallback` is needed as an initial guess — Kalibr optimises all
+> intrinsics from the data. The DepthAI JSON is not used.
+
+---
+
 ### Prerequisites
 
 1. **Print the AprilGrid** defined in `kalibr_aprilgrid.yaml` (6×6, 45 mm tags, 0.3 spacing).
@@ -133,9 +167,8 @@ Two tools are involved — record **one bag**, run them in sequence:
    source /media/logic/USamsung/ros2_ws/install/setup.bash
    ```
 
-3. **Create an output directory for calibration results:**
+3. **Create directories:**
    ```bash
-   mkdir -p /media/logic/USamsung/ros2_ws/src/kalibr_ros2/calibration_results
    mkdir -p /media/logic/USamsung/ros2_ws/calibration_bags
    ```
 
@@ -163,7 +196,8 @@ ros2 launch depthai_ros_driver driver.launch.py \
 ```bash
 cd /media/logic/USamsung/ros2_ws
 source /opt/ros/jazzy/setup.bash && source install/setup.bash
-ros2 bag record -o calibration_bags/rgb_imu_calibration \
+# Use a descriptive name: YYMMDD_<lens>_rgb_imu_calibration
+ros2 bag record -o calibration_bags/26_04_09_hq83_rgb_imu_calibration \
   /oak/rgb/image_raw \
   /oak/imu/data
 ```
@@ -184,45 +218,44 @@ Stop recording with Ctrl-C in Terminal 2, then Ctrl-C in Terminal 1.
 
 Calibrates focal length, principal point, and radial-tangential distortion coefficients.
 
+Set `BAG_FOLDER` to the folder recorded above, and `LENS_CONFIG` to match your lens
+(see the lens table at the top of this section).
+
+**HQ83 lens example:**
 ```bash
 cd /media/logic/USamsung/ros2_ws
+source /opt/ros/jazzy/setup.bash && source install/setup.bash
+BAG_FOLDER=26_04_09_hq83_rgb_imu_calibration
+LENS_CONFIG=src/kalibr_ros2/aslam_offline_calibration/kalibr2_ros/kalibr_rgb_hq83_config.yaml
+mkdir -p calibration_bags/$BAG_FOLDER/calibration_results
 ros2 run kalibr2_ros kalibr_calibrate_cameras \
-  --config src/kalibr_ros2/aslam_offline_calibration/kalibr2_ros/kalibr_rgb_config.yaml \
-  --output-dir src/kalibr_ros2/calibration_results/
+  --config $LENS_CONFIG \
+  --bag calibration_bags/$BAG_FOLDER/$(ls calibration_bags/$BAG_FOLDER/*.mcap | xargs basename) \
+  --output-dir calibration_bags/$BAG_FOLDER/calibration_results/
 ```
 
-The config (`kalibr_rgb_config.yaml`) is pre-configured for the IMX577:
-
-- `model: 'pinhole-radtan'` — radial-tangential model for the corrected wide-angle lens
-- `focal_length_fallback: 806.0` — initial guess: `fx = 1920 / (2 × tan(50°)) ≈ 806 px`
-
-> **Why `pinhole-radtan`, not `pinhole-equi`?**  
-> Despite the 113° diagonal FOV, the M12 HQ113 lens spec states **Distortion: <-1.5%**.
-> Fisheye lenses at this FOV have 30–50%+ distortion. A corrected wide-angle lens with 1.5%
-> distortion behaves like a rectilinear projection and is correctly modelled with `radtan`.
-> Using `pinhole-equi` here causes the optimizer to diverge (~485 px RMSE). Basalt also
-> confirms `radtan` is correct — it uses `pinhole-radtan8` for this lens successfully.
-
-> **Do I need to provide HFOV or the DepthAI extrinsics JSON?**  
-> No. Only `focal_length_fallback` is needed as an initial guess — Kalibr optimises it from
-> the data. The DepthAI calibration JSON is not used. No camera prior beyond the focal length
-> estimate is required.
+**HQ113 lens example:**
+```bash
+cd /media/logic/USamsung/ros2_ws
+source /opt/ros/jazzy/setup.bash && source install/setup.bash
+BAG_FOLDER=26_04_09_hq113_rgb_imu_calibration
+LENS_CONFIG=src/kalibr_ros2/aslam_offline_calibration/kalibr2_ros/kalibr_rgb_config.yaml
+mkdir -p calibration_bags/$BAG_FOLDER/calibration_results
+ros2 run kalibr2_ros kalibr_calibrate_cameras \
+  --config $LENS_CONFIG \
+  --bag calibration_bags/$BAG_FOLDER/$(ls calibration_bags/$BAG_FOLDER/*.mcap | xargs basename) \
+  --output-dir calibration_bags/$BAG_FOLDER/calibration_results/
+```
 
 Output file (CameraInfo format):
 ```
-src/kalibr_ros2/calibration_results/calibration_rgb_imx577.yaml
+calibration_bags/$BAG_FOLDER/calibration_results/calibration_rgb_imx577.yaml
 ```
 
 **Quality check:** Reprojection error should be **< 0.5 px**. Above 1 px indicates a
 problem — re-record with slower movement and better corner coverage.
 
-To limit processing time on long bags:
-```bash
-ros2 run kalibr2_ros kalibr_calibrate_cameras \
-  --config src/kalibr_ros2/aslam_offline_calibration/kalibr2_ros/kalibr_rgb_config.yaml \
-  --output-dir src/kalibr_ros2/calibration_results/ \
-  --max-observations 500
-```
+To limit processing time on long bags, add `--max-observations 500`.
 
 ---
 
@@ -271,10 +304,12 @@ to the BMI270 IMU frame, plus the temporal offset between their clocks.
 > No orientation prior, no extrinsics guess, and no DepthAI JSON are needed.
 
 ```bash
-cd /media/logic/USamsung/ros2_ws && source /opt/ros/jazzy/setup.bash && source install/setup.bash && \
+cd /media/logic/USamsung/ros2_ws && source /opt/ros/jazzy/setup.bash && source install/setup.bash
+BAG_FOLDER=26_04_09_rgb_imu_calibration
+MCAP=$(ls calibration_bags/$BAG_FOLDER/*.mcap)
 ros2 run kalibr_imu_ros2 kalibr_calibrate_imu_camera \
-  --bag calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0.mcap \
-  --cam src/kalibr_ros2/calibration_results/camchain_rgb_imx577.yaml \
+  --bag $MCAP \
+  --cam calibration_bags/$BAG_FOLDER/calibration_results/camchain_rgb_imx577.yaml \
   --imu src/kalibr_ros2/kalibr_bmi270_imu.yaml \
   --target src/kalibr_ros2/kalibr_aprilgrid.yaml \
   --dont-show-report \
@@ -283,9 +318,9 @@ ros2 run kalibr_imu_ros2 kalibr_calibrate_imu_camera \
 
 Output files are written **alongside the bag file** (named from the `.mcap` filename, no `--output-dir` flag):
 ```
-calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-camchain-imucam.yaml   ← T_cam_imu + timeshift
-calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-imu.yaml               ← refined IMU parameters
-calibration_bags/rgb_imu_calibration/rgb_imu_calibration_0-results-imucam.txt     ← text summary
+calibration_bags/$BAG_FOLDER/<bag>-camchain-imucam.yaml   ← T_cam_imu + timeshift
+calibration_bags/$BAG_FOLDER/<bag>-imu.yaml               ← refined IMU parameters
+calibration_bags/$BAG_FOLDER/<bag>-results-imucam.txt     ← text summary
 ```
 A copy is also saved to `src/kalibr_ros2/calibration_results/imu_camera_chain_rgb_bmi270.yaml`.
 
